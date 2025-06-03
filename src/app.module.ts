@@ -4,9 +4,8 @@ import { BillingModule } from './billing/billing.module';
 import { PlansModule } from './plans/plans.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
-import { AdminModule } from './admin/admin.module';
 
 @Module({
-  imports: [AuthModule, BillingModule, PlansModule, SubscriptionsModule, RateLimitModule, AdminModule],
+  imports: [AuthModule, BillingModule, PlansModule, SubscriptionsModule, RateLimitModule],
 })
 export class AppModule {}
