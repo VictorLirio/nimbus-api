@@ -5,4 +5,11 @@ export const LoginSchema = z.object({
   password: z.string().min(8),
 });
 
-export type LoginDto = z.infer<typeof LoginSchema>;
+export class LoginDto implements z.infer<typeof LoginSchema> {
+  email: string;
+  password: string;
+
+  constructor(data: z.infer<typeof LoginSchema>) {
+    Object.assign(this, data);
+  }
+}
