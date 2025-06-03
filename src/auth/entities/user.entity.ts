@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Subscription } from '../../subscriptions/entities/subscription.entity';
 import { Role } from '../enums/role.enum';
+import { RefreshToken } from './refresh-token.entity';
 
 @Entity()
 export class User {
@@ -12,11 +14,36 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  @Column({ nullable: true })
+  name: string;
+
+  @Column({ 
+    type: 'enum', 
+    enum: Role, 
+    default: Role.USER 
+  })
   role: Role;
 
   @Column({ nullable: true })
-  refreshToken?: string;
+  stripeCustomerId: string;
+
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @Column({ nullable: true })
+  verificationToken: string;
+
+  @Column({ nullable: true })
+  passwordResetToken: string;
+
+  @Column({ nullable: true })
+  passwordResetExpires: Date;
+
+  @OneToMany(() => RefreshToken, (token) => token.user)
+  refreshTokens: RefreshToken[];
+
+  @OneToMany(() => Subscription, (subscription) => subscription.user)
+  subscriptions: Subscription[];
 
   @CreateDateColumn()
   createdAt: Date;
