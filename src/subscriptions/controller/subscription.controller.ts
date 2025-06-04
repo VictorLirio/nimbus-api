@@ -8,6 +8,7 @@ import {
   Patch,
   UseGuards,
   Req,
+  NotFoundException,
 } from '@nestjs/common';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -15,6 +16,10 @@ import { SubscriptionResponseDto } from '../dto/subscription-response.dto';
 import { CreateSubscriptionDto } from '../dto/create-subscription.dto';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChangePlanDto } from '../dto/change-subscription.dto';
+import { SubscriptionsService } from '../services/subscriptions.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Role } from 'src/auth/enums/role.enum';
+import type { Subscription } from '../entities/subscription.entity';
 
 
 @ApiTags('subscriptions')
@@ -25,7 +30,7 @@ export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Post()
-  @Roles(UserRole.USER)
+  @Roles(Role.USER)
   @ApiResponse({ type: SubscriptionResponseDto })
   async create(
     @Req() req,
@@ -35,11 +40,15 @@ export class SubscriptionsController {
       req.user,
       createSubscriptionDto,
     );
+
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
     return this.toResponseDto(subscription);
   }
 
   @Get()
-  @Roles(UserRole.USER)
+  @Roles(Role.USER)
   @ApiResponse({ type: [SubscriptionResponseDto] })
   async findAll(@Req() req): Promise<SubscriptionResponseDto[]> {
     const subscriptions = await this.subscriptionsService.findUserSubscriptions(
@@ -49,7 +58,7 @@ export class SubscriptionsController {
   }
 
   @Get(':id')
-  @Roles(UserRole.USER)
+  @Roles(Role.USER)
   @ApiResponse({ type: SubscriptionResponseDto })
   async findOne(
     @Req() req,
@@ -66,7 +75,7 @@ export class SubscriptionsController {
   }
 
   @Delete(':id/cancel')
-  @Roles(UserRole.USER)
+  @Roles(Role.USER)
   @ApiResponse({ type: SubscriptionResponseDto })
   async cancel(
     @Req() req,
@@ -77,7 +86,7 @@ export class SubscriptionsController {
   }
 
   @Patch(':id/change-plan')
-  @Roles(UserRole.USER)
+  @Roles(Role.USER)
   @ApiResponse({ type: SubscriptionResponseDto })
   async changePlan(
     @Req() req,
@@ -90,5 +99,19 @@ export class SubscriptionsController {
       changePlanDto,
     );
     return this.toResponseDto(subscription);
+  }
+
+  private toResponseDto(subscription: Subscription): SubscriptionResponseDto {
+    return {
+      id: subscription.id,
+      planId: subscription.plan.id,
+      status: subscription.status,
+      currentPeriodStart: subscription.currentPeriodStart,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      isTrial: subscription.isTrial,
+      trialEndsAt: subscription.trialEndsAt,
+      canceledAt: subscription.canceledAt,
+      createdAt: subscription.createdAt,
+    };
   }
 }
