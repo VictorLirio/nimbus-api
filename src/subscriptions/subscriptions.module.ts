@@ -6,6 +6,7 @@ import { BillingModule } from '../billing/billing.module';
 import { AuthModule } from '../auth/auth.module';
 import { SubscriptionsController } from './controller/subscription.controller';
 import { SubscriptionRepository } from './repositories/subscription.repository';
+import { SubscriptionsService } from './services/subscriptions.service';
 
 @Module({
   imports: [
