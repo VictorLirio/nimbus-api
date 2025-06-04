@@ -40,7 +40,7 @@ export class Subscription {
   isTrial: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
-  trialEndsAt: Date;
+  trialEndsAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
