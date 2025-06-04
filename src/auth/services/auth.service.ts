@@ -19,6 +19,9 @@ import { TokenResponseDto } from '../dto/token-response.dto';
 import { bcrypt } from 'bcrypt';
 import type { RefreshTokenDto } from '../dto/refresh-token.dto';
 import type { ChangePasswordDto } from '../dto/change-password.dto';
+import { UserRegisteredEvent } from '../events/user-registered.event';
+import { PasswordResetRequestedEvent } from '../events/password-reset-requested.event';
+import type { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -247,7 +250,7 @@ export class AuthService {
     return require('crypto').randomBytes(32).toString('hex');
   }
 
-  async validateUser(payload: JwtPayload): Promise<User | undefined> {
+  async validateUser(payload: JwtPayload): Promise<User | null> {
     return this.userService.findById(payload.sub);
   }
 
@@ -265,5 +268,13 @@ export class AuthService {
         { isRevoked: true },
       );
     }
+  }
+
+  async validateLocalUser(email: string, password: string): Promise<User | null> {
+    const user = await this.userService.findByEmail(email);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
+    }
+    return null;
   }
 }
