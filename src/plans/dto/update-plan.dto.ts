@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { CreatePlanSchema } from './create-plan.dto';
+import { createZodDto } from 'nestjs-zod';
+import { CreatePlanDto } from './create-plan.dto';
 
-export const UpdatePlanSchema = CreatePlanSchema.partial();
-export type UpdatePlanDto = z.infer<typeof UpdatePlanSchema>;
+export const UpdatePlanSchema = CreatePlanDto.schema.partial();
+
+export class UpdatePlanDto extends createZodDto(UpdatePlanSchema) {
+  static schema = UpdatePlanSchema;
+}
