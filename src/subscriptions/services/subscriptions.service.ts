@@ -11,6 +11,12 @@ import { Repository, LessThan, MoreThan, Between } from 'typeorm';
 import { User } from '../../auth/entities/user.entity';
 import { Plan } from '../../plans/entities/plan.entity';
 import { Subscription } from '../entities/subscription.entity';
+import { SubscriptionStatus } from '../enums/subscription-status.enum';
+import { ChangePlanDto } from '../dto/change-subscription.dto';
+import { CreateSubscriptionDto } from '../dto/create-subscription.dto';
+import { PlansService } from 'src/plans/services/plans.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserService } from 'src/auth/services/user.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -33,7 +39,7 @@ export class SubscriptionsService {
   /**
    * Cria uma nova assinatura
    */
-  async create(user: User, createDto: CreateSubscriptionDto): Promise<Subscription> {
+  async create(user: User, createDto: CreateSubscriptionDto): Promise<Subscription | null> {
     // Verifica se o usuário já tem uma assinatura ativa
     const existingSubscription = await this.findActiveUserSubscription(user.id);
     if (existingSubscription) {
@@ -58,8 +64,8 @@ export class SubscriptionsService {
 
       // Cria a assinatura no banco de dados
       const subscription = this.subscriptionRepository.create({
-        user,
-        plan,
+        userId: user.id,
+        planId: plan.id,
         status: stripeSubscription.status as SubscriptionStatus,
         stripeSubscriptionId: stripeSubscription.id,
         stripeCustomerId: user.stripeCustomerId,
@@ -247,8 +253,8 @@ export class SubscriptionsService {
     subscription.currentPeriodEnd = new Date(stripeSubscription.current_period_end * 1000);
     subscription.isTrial = stripeSubscription.status === 'trialing';
     subscription.trialEndsAt = stripeSubscription.trial_end 
-      ? new Date(stripeSubscription.trial_end * 1000) 
-      : null;
+    ? new Date(stripeSubscription.trial_end * 1000) 
+    : null;
 
     // Trata cancelamento no final do período
     if (stripeSubscription.cancel_at_period_end) {
