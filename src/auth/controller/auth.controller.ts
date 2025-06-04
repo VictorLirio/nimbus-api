@@ -20,8 +20,8 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { User } from '../entities/user.entity';
 import { UserResponseDto } from '../dto/user-response.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
-import { CurrentUser } from '@nestjs/auth';
 import { ChangePasswordDto } from '../dto/change-password.dto';
+import { CurrentUser } from '../decorators/current-user.decorator';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
